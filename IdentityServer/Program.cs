@@ -1,5 +1,7 @@
 ﻿using IsServerEfCore;
+using Microsoft.AspNetCore.DataProtection;
 using Serilog;
+using System.Security.Cryptography.X509Certificates;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -11,8 +13,15 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    var trimmedContentRootPath = builder.Environment.ContentRootPath.TrimEnd(Path.DirectorySeparatorChar);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("."))
+        .ProtectKeysWithCertificate(new X509Certificate2("IIS-EXPRESS-DEV-CERT.pfx", "dvanhk8s"))
+     .SetApplicationName(trimmedContentRootPath);
+
     builder.Host.UseSerilog((ctx, lc) => lc
-        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+        //.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+        //.WriteTo.File("serilog.txt")
         .Enrich.FromLogContext()
         .ReadFrom.Configuration(ctx.Configuration));
 

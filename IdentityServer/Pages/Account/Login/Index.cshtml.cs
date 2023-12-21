@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Serilog;
 using SimpleMembership;
+using ILogger = Serilog.ILogger;
 
 namespace IsServerEfCore.Pages.Login
 {
@@ -16,6 +18,8 @@ namespace IsServerEfCore.Pages.Login
     [AllowAnonymous]
     public class Index : PageModel
     {
+        private readonly ILogger log = Log.Logger.ForContext<Index>();
+
         private readonly TestUserStore _users;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IEventService _events;
@@ -58,6 +62,7 @@ namespace IsServerEfCore.Pages.Login
 
         public async Task<IActionResult> OnPost()
         {
+            log.Information("IDENTITY LOGIN");
             // check if we are in the context of an authorization request
             var context = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl);
 

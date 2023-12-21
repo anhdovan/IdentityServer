@@ -8,6 +8,7 @@ using IsServerEfCore.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Security.Cryptography.X509Certificates;
 
 namespace IsServerEfCore
 {
@@ -16,6 +17,14 @@ namespace IsServerEfCore
         public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddRazorPages();
+
+//            var logger = new LoggerConfiguration()
+//.ReadFrom.Configuration(builder.Configuration)
+//.Enrich.FromLogContext()
+//.CreateLogger();
+
+//            builder.Logging.ClearProviders();
+//            builder.Logging.AddSerilog(logger);
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -32,6 +41,7 @@ namespace IsServerEfCore
                 })
                 .AddProfileService<MyProfileService>()
                 .AddTestUsers(TestUsers.Users)
+                 .AddSigningCredential(new X509Certificate2("IIS-EXPRESS-DEV-CERT.pfx", "dvanhk8s"))
                 // this adds the config data from DB (clients, resources, CORS)
                 .AddConfigurationStore(options =>
                 {
@@ -71,7 +81,6 @@ namespace IsServerEfCore
 
                 builder.Services.Configure<RazorPagesOptions>(options =>
                     options.Conventions.AuthorizeFolder("/Admin", "admin"));
-
                 builder.Services.AddTransient<IsServerEfCore.Pages.Portal.ClientRepository>();
                 builder.Services.AddTransient<ClientRepository>();
                 builder.Services.AddTransient<IdentityScopeRepository>();
@@ -97,7 +106,7 @@ namespace IsServerEfCore
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
             app.UseIdentityServer();

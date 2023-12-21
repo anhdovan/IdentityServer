@@ -9,6 +9,12 @@
 		<PackageReference Include="Duende.IdentityServer.EntityFramework" Version="6.3.2" />
 
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.0" />
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.24" />
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.24" />
+
+		<PackageReference Include="Oracle.EntityFrameworkCore" Version="6.21.120" />
 		<PackageReference Include="Serilog.AspNetCore" Version="6.0.0" />
 
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.0" />
@@ -22,6 +28,24 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\SimpleMembership\SimpleMembership.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="IdentityServer.db">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="IIS-EXPRESS-DEV-CERT.pfx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="IS-Cert-1.pfx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="IS-newest-cert.pfx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="test-cert.pfx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

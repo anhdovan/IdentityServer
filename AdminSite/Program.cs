@@ -4,15 +4,21 @@ using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-
+using Serilog;
+using System.Net;
 namespace LoginSite
 {
     public class Program
     {
         public static void Main(string[] args)
         {
+            ServicePointManager.ServerCertificateValidationCallback += (o, c, ch, e) => true;
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.Host.UseSerilog((ctx, lc) => lc
+     //.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+     //.WriteTo.File("serilog.txt")
+     .Enrich.FromLogContext()
+     .ReadFrom.Configuration(ctx.Configuration));
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddAuthorization(options =>
@@ -44,11 +50,19 @@ namespace LoginSite
                 })
                 .AddOpenIdConnect("oidc", options =>
                 {
-                    options.Authority = "https://localhost:5001";
+                    HttpClientHandler handler = new HttpClientHandler();
+                    handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                    options.BackchannelHttpHandler = handler;
 
-                    options.ClientId = "interactive";
+                    var iscfg = builder.Configuration.GetSection("IsConfig");
+                    var serverUrl = iscfg.GetValue("".GetType(), "url").ToString();
+                    var clientId = iscfg.GetValue("".GetType(), "clientId").ToString();
+                    var clientSecret = iscfg.GetValue("".GetType(), "clientSecret").ToString();
+                    options.Authority = serverUrl;
+
+                    options.ClientId = clientId;
                     options.UsePkce = true;
-                    options.ClientSecret = "secret";
+                    options.ClientSecret = clientSecret;
                     options.ResponseType = "code";
                     options.ResponseMode = "form_post";
                     //options.Prompt = "consent";
@@ -85,7 +99,7 @@ namespace LoginSite
            
 
             var app = builder.Build();
-
+            app.UseSerilogRequestLogging();
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
